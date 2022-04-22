@@ -1,4 +1,5 @@
 import json
+from time import sleep
 
 from lx16a_controller import LX16A_BUS_MODIFIED
 
@@ -19,26 +20,31 @@ class SERVO:
         return self.bus_link.readPosition(self.id)
 
     def setPosition(self, pos):
+        if pos > self.max:
+            pos = self.max
+        elif pos < self.min:
+            pos = self.min
+        
         self.bus_link.moveServo(self.id, pos)
         self.curr_angle = pos
-
-    def setOffsetPosition(self, offset):
-        self.setPosition(self.curr_angle - offset)
 
 class LEG:
     def __init__(self, servo_objects):
         self.servos = servo_objects
         self.clean_ids = [s.id for s in self.servos]
+        self.curr_angs = [s.curr_angle for s in self.servos]
 
-    def positionLeg(self, angs):
-        for i in range(len(servo_objects)):
-            if angs[i] is not None:
-                self.servo_objects[i].setPosition(angs[i])
+    def updateCurrAngles(self):
+        self.curr_angs = [s.curr_angle for s in self.servos]
 
-    def positionLegOffset(self, offsets):
-        for i in range(len(servo_objects)):
-            if offsets[i] is not None:
-                self.servo_objects[i].setOffsetPosition(offsets[i])
+    def raiseLowerLegParallel(self, z):
+        self.servos[1].setPosition(self.curr_angs[1] - z)
+        self.servos[2].setPosition(self.curr_angs[2] + z)
+        self.updateCurrAngles()
+
+    def moveLegArc(self, arc):
+        self.servos[0].setPosition(self.curr_angs[0] + arc)
+        self.updateCurrAngles()
 
 class HEXAPOD_BODY:
     def __init__(self, servo_params, bus_link):
@@ -51,9 +57,57 @@ class HEXAPOD_BODY:
                 servos.append(SERVO(id, *angs, bus_link))
             self.leg_objects[leg] = LEG(servos)
 
+    def changeBodyHeight(self, z):
+        for leg in self.leg_objects:
+            self.leg_objects[leg].raiseLowerLegParallel(z)
+
+    def rotateInPlace(self, arc, z):
+        first_group = ["front_right", "rear_right", "mid_left"]
+        second_group = ["front_left", "rear_left", "mid_right"]
+
+        #lift first group legs, rotate forward, and then lower
+        for leg in first_group:
+            self.leg_objects[leg].raiseLowerLegParallel(z)
+        sleep(1)
+        for leg in first_group:
+            self.leg_objects[leg].moveLegArc(arc)
+        sleep(1)
+        for leg in first_group:
+            self.leg_objects[leg].raiseLowerLegParallel(z * -1)
+        sleep(1)
+
+        for leg in second_group:
+            self.leg_objects[leg].raiseLowerLegParallel(z)
+        sleep(1)
+        for leg in first_group:
+            self.leg_objects[leg].moveLegArc(arc * -1)
+        sleep(1)
+        for leg in second_group:
+            self.leg_objects[leg].raiseLowerLegParallel(z * -1)
+        sleep(1)
+
+    def moveInDirection(self, leg_directions, arc, z):
+        pass
+
+
 if __name__ == "__main__":
     lx_bus= LX16A_BUS_MODIFIED(debug = True)
 
     with open('servo_params') as f:
         params = json.load(f)
     main_hexapod = HEXAPOD_BODY(params, lx_bus)
+
+    for i in range(10, 100, 10):
+        main_hexapod.changeBodyHeight(i)
+        sleep(1)
+    
+    sleep(2)
+
+    for i in range(10, 100, 10):
+        main_hexapod.changeBodyHeight(i * -1)
+        sleep(1)
+
+    sleep(2)
+    
+    for i in range(5):
+        main_hexapod.rotateInPlace(20, 20)

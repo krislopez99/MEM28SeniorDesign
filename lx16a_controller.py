@@ -250,7 +250,7 @@ class LX16A_BUS_MODIFIED(LX16A_BUS):
 
 
 if __name__ == '__main__':
-   controller = LX16A_MODIFIED()
+   controller = LX16A_BUS_MODIFIED()
 
    for id in range(1, 19):
       controller.LoadUnload(id, 1)
@@ -287,3 +287,11 @@ if __name__ == '__main__':
          controller.moveServo(id, 200)
 
       sleep(5)
+
+"""
+- keep track of origin of the body with respect to the origin of the robot
+
+- the origin of the robot would be the floor centered between all the legs
+
+- each leg calculation starts at the point of 
+"""
