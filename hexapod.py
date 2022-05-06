@@ -101,6 +101,33 @@ class HEXAPOD_BODY:
             self.leg_objects[leg].raiseLowerLegParallel(z * -1)
         sleep(0.5)
 
+    def moveForward(self, arc, z):
+        first_group = ["front_right", "rear_right", "mid_left"]
+        second_group = ["front_left", "rear_left", "mid_right"]
+
+        #lift first group legs, rotate forward, and then lower
+        for leg in first_group:
+            self.leg_objects[leg].raiseLowerLegParallel(z)
+        sleep(0.5)
+        self.leg_objects["front_right"].moveLegArc(arc)
+        self.leg_objects["rear_right"].moveLegArc(arc)
+        self.leg_objects["mid_left"].moveLegArc(arc * -1)
+        sleep(0.5)
+        for leg in first_group:
+            self.leg_objects[leg].raiseLowerLegParallel(z * -1)
+        sleep(0.5)
+
+        for leg in second_group:
+            self.leg_objects[leg].raiseLowerLegParallel(z)
+        sleep(0.5)
+        self.leg_objects["front_right"].moveLegArc(arc * -1)
+        self.leg_objects["rear_right"].moveLegArc(arc * -1)
+        self.leg_objects["mid_left"].moveLegArc(arc)
+        sleep(0.5)
+        for leg in second_group:
+            self.leg_objects[leg].raiseLowerLegParallel(z * -1)
+        sleep(0.5)
+
     def moveInDirection(self, leg_directions, arc, z):
         pass
 
@@ -125,6 +152,9 @@ if __name__ == "__main__":
     for i in range(1, 10):
         main_hexapod.changeBodyHeight(i * -10)
     sleep(1)
+    # for i in range(5):
+    #     main_hexapod.rotateInPlace(20, 20)
+
     for i in range(5):
-        main_hexapod.rotateInPlace(20, 20)
+        main_hexapod.moveForward(20, 20)
 
