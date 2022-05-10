@@ -102,31 +102,65 @@ class HEXAPOD_BODY:
         sleep(0.5)
 
     def moveForward(self, arc, z):
-        first_group = ["front_right", "rear_right", "mid_left"]
+        arc_half = int(arc/2)
+	first_group = ["front_right", "rear_right", "mid_left"]
         second_group = ["front_left", "rear_left", "mid_right"]
+	legs = ["front_right", "front_left", "mid_right", "mid_left", "rear_right", "rear_left"]
+
 
         #lift first group legs, rotate forward, and then lower
-        for leg in first_group:
-            self.leg_objects[leg].raiseLowerLegParallel(z)
-        sleep(1)
-        self.leg_objects["front_right"].moveLegArc(arc - 50)
-        self.leg_objects["rear_right"].moveLegArc(arc)
-        self.leg_objects["mid_left"].moveLegArc(arc * -1)
-        sleep(1)
-        for leg in first_group:
-            self.leg_objects[leg].raiseLowerLegParallel(z * -1)
-        sleep(1)
+        for leg in legs:
+	    if leg in first_group:
+            	self.leg_objects[leg].raiseLowerLegParallel(z)
+		if leg == "mid_left":
+	   	    self.leg_objects[leg].moveLegArc(arc_half * -1)
+		else:
+		    self.leg_objects[leg].moveLegArc(arc_half)
+	    else:
+		if leg == "mid_right":
+	   	    self.leg_objects[leg].moveLegArc(arc_half)
+	  	else:
+		    self.leg_object[leg].moveLegArc(arc_half * -1)
+	sleep(1)
+	for leg in legs:
+            if leg in first_group:
+                self.leg_objects[leg].raiseLowerLegParallel(z * -1)
+                if leg == "mid_left":
+                    self.leg_objects[leg].moveLegArc(arc_half * -1)
+                else:
+                    self.leg_objects[leg].moveLegArc(arc_half)
+            else:
+                if leg == "mid_right":
+                    self.leg_objects[leg].moveLegArc(arc_half)
+                 else:
+                    self.leg_object[leg].moveLegArc(arc_half * -1)
 
-        for leg in second_group:
-            self.leg_objects[leg].raiseLowerLegParallel(z)
+
+	for leg in legs:
+            if leg in second_group:
+                self.leg_objects[leg].raiseLowerLegParallel(z)
+                if leg == "mid_right":
+                    self.leg_objects[leg].moveLegArc(arc_half * -1)
+                else:
+                    self.leg_objects[leg].moveLegArc(arc_half)
+            else:
+                if leg == "mid_left":
+                    self.leg_objects[leg].moveLegArc(arc_half)
+                else:
+                    self.leg_object[leg].moveLegArc(arc_half * -1)
         sleep(1)
-        self.leg_objects["front_right"].moveLegArc((arc * -1) + 50)
-        self.leg_objects["rear_right"].moveLegArc(arc * -1)
-        self.leg_objects["mid_left"].moveLegArc(arc)
-        sleep(1)
-        for leg in second_group:
-            self.leg_objects[leg].raiseLowerLegParallel(z * -1)
-        sleep(1)
+        for leg in legs:
+            if leg in second_group:
+                self.leg_objects[leg].raiseLowerLegParallel(z * -1)
+                if leg == "mid_right":
+                    self.leg_objects[leg].moveLegArc(arc_half * -1)
+                else:
+                    self.leg_objects[leg].moveLegArc(arc_half)
+            else:
+                if leg == "mid_left":
+                    self.leg_objects[leg].moveLegArc(arc_half)
+                else:
+                    self.leg_object[leg].moveLegArc(arc_half * -1)
 
     def moveInDirection(self, leg_directions, arc, z):
         pass
