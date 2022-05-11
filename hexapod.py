@@ -124,7 +124,7 @@ class HEXAPOD_BODY:
                     self.leg_objects[leg].moveLegArc(arc_half * -1)
                 else:
                     self.leg_objects[leg].moveLegArc(arc_half)
-        sleep(2)
+        sleep(1)
         for leg in self.leg_objects:
             if leg in first_group:
                 self.leg_objects[leg].raiseLowerLegParallel(z * -1)
@@ -137,7 +137,7 @@ class HEXAPOD_BODY:
                     self.leg_objects[leg].moveLegArc(arc_half * -1)
                 else:
                     self.leg_objects[leg].moveLegArc(arc_half)
-        sleep(2)
+        sleep(1)
 
     def groupTwoMoveForward(self, arc, z):
         arc_half = int(arc/2)
@@ -155,7 +155,7 @@ class HEXAPOD_BODY:
                     self.leg_objects[leg].moveLegArc(arc_half)
                 else:
                     self.leg_objects[leg].moveLegArc(arc_half * -1)
-        sleep(2)
+        sleep(1)
         for leg in self.leg_objects:
             if leg in second_group:
                 self.leg_objects[leg].raiseLowerLegParallel(z * -1)
@@ -168,7 +168,7 @@ class HEXAPOD_BODY:
                     self.leg_objects[leg].moveLegArc(arc_half)
                 else:
                     self.leg_objects[leg].moveLegArc(arc_half * -1)
-        sleep(2)
+        sleep(1)
 
     def moveInDirection(self, leg_directions, arc, z):
         pass
@@ -201,6 +201,5 @@ if __name__ == "__main__":
 
     for i in range(5):
         main_hexapod.groupOneMoveForward(150, 200)
-        sleep(2)
         main_hexapod.groupTwoMoveForward(150, 200)
 
