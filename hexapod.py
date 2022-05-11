@@ -75,6 +75,11 @@ class HEXAPOD_BODY:
     def changeBodyHeight(self, z):
         for leg in self.leg_objects:
             self.leg_objects[leg].raiseLowerLegParallel(z)
+    
+    def reorientYaw(self):
+        for leg in self.leg_objects:
+            self.leg_objects[leg].servos[0].setPosition(500)
+            self.leg_objects[leg].updateCurrAngles()
 
     def rotateInPlace(self, arc, z):
         first_group = ["front_right", "rear_right", "mid_left"]
@@ -105,10 +110,9 @@ class HEXAPOD_BODY:
         arc_half = int(arc/2)
         first_group = ["front_right", "rear_right", "mid_left"]
         second_group = ["front_left", "rear_left", "mid_right"]
-        legs = ["front_right", "front_left", "mid_right", "mid_left", "rear_right", "rear_left"]
 
         #lift first group legs, rotate forward, and then lower
-        for leg in legs:
+        for leg in self.leg_objects:
             if leg in first_group:
                 self.leg_objects[leg].raiseLowerLegParallel(z)
                 if leg == "mid_left":
@@ -119,9 +123,9 @@ class HEXAPOD_BODY:
                 if leg == "mid_right":
                     self.leg_objects[leg].moveLegArc(arc_half * -1)
                 else:
-                    self.leg_object[leg].moveLegArc(arc_half)
+                    self.leg_objects[leg].moveLegArc(arc_half)
         sleep(1)
-        for leg in legs:
+        for leg in self.leg_objects:
             if leg in first_group:
                 self.leg_objects[leg].raiseLowerLegParallel(z * -1)
                 if leg == "mid_left":
@@ -132,14 +136,13 @@ class HEXAPOD_BODY:
                 if leg == "mid_right":
                     self.leg_objects[leg].moveLegArc(arc_half * -1)
                 else:
-                    self.leg_object[leg].moveLegArc(arc_half)
+                    self.leg_objects[leg].moveLegArc(arc_half)
 
     def groupTwoMoveForward(self, arc, z):
         arc_half = int(arc/2)
         first_group = ["front_right", "rear_right", "mid_left"]
         second_group = ["front_left", "rear_left", "mid_right"]
-        legs = ["front_right", "front_left", "mid_right", "mid_left", "rear_right", "rear_left"]
-        for leg in legs:
+        for leg in self.leg_objects:
             if leg in second_group:
                 self.leg_objects[leg].raiseLowerLegParallel(z)
                 if leg == "mid_right":
@@ -150,9 +153,9 @@ class HEXAPOD_BODY:
                 if leg == "mid_left":
                     self.leg_objects[leg].moveLegArc(arc_half)
                 else:
-                    self.leg_object[leg].moveLegArc(arc_half * -1)
+                    self.leg_objects[leg].moveLegArc(arc_half * -1)
         sleep(1)
-        for leg in legs:
+        for leg in self.leg_objects:
             if leg in second_group:
                 self.leg_objects[leg].raiseLowerLegParallel(z * -1)
                 if leg == "mid_right":
@@ -163,7 +166,7 @@ class HEXAPOD_BODY:
                 if leg == "mid_left":
                     self.leg_objects[leg].moveLegArc(arc_half)
                 else:
-                    self.leg_object[leg].moveLegArc(arc_half * -1)
+                    self.leg_objects[leg].moveLegArc(arc_half * -1)
 
     def moveInDirection(self, leg_directions, arc, z):
         pass
@@ -182,6 +185,8 @@ if __name__ == "__main__":
 
     # status_thread = threading.Thread(target=printHexapodErrors, args=())
     # status_thread.start()
+
+    main_hexapod.reorientYaw(500)
 
     for i in range(1, 10):
         main_hexapod.changeBodyHeight(i * 10)
