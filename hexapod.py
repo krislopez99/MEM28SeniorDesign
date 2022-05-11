@@ -117,9 +117,9 @@ class HEXAPOD_BODY:
                     self.leg_objects[leg].moveLegArc(arc_half)
             else:
                 if leg == "mid_right":
-                    self.leg_objects[leg].moveLegArc(arc_half)
+                    self.leg_objects[leg].moveLegArc(arc_half * -1)
                 else:
-                    self.leg_object[leg].moveLegArc(arc_half * -1)
+                    self.leg_object[leg].moveLegArc(arc_half)
         sleep(1)
         for leg in legs:
             if leg in first_group:
@@ -130,18 +130,18 @@ class HEXAPOD_BODY:
                     self.leg_objects[leg].moveLegArc(arc_half)
             else:
                 if leg == "mid_right":
-                    self.leg_objects[leg].moveLegArc(arc_half)
+                    self.leg_objects[leg].moveLegArc(arc_half * -1)
                 else:
-                    self.leg_object[leg].moveLegArc(arc_half * -1)
+                    self.leg_object[leg].moveLegArc(arc_half)
 
 
         for leg in legs:
             if leg in second_group:
                 self.leg_objects[leg].raiseLowerLegParallel(z)
                 if leg == "mid_right":
-                    self.leg_objects[leg].moveLegArc(arc_half * -1)
-                else:
                     self.leg_objects[leg].moveLegArc(arc_half)
+                else:
+                    self.leg_objects[leg].moveLegArc(arc_half *-1)
             else:
                 if leg == "mid_left":
                     self.leg_objects[leg].moveLegArc(arc_half)
@@ -152,9 +152,9 @@ class HEXAPOD_BODY:
             if leg in second_group:
                 self.leg_objects[leg].raiseLowerLegParallel(z * -1)
                 if leg == "mid_right":
-                    self.leg_objects[leg].moveLegArc(arc_half * -1)
-                else:
                     self.leg_objects[leg].moveLegArc(arc_half)
+                else:
+                    self.leg_objects[leg].moveLegArc(arc_half * -1)
             else:
                 if leg == "mid_left":
                     self.leg_objects[leg].moveLegArc(arc_half)
