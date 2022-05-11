@@ -75,7 +75,7 @@ class HEXAPOD_BODY:
     def changeBodyHeight(self, z):
         for leg in self.leg_objects:
             self.leg_objects[leg].raiseLowerLegParallel(z)
-    
+
     def reorientYaw(self):
         for leg in self.leg_objects:
             self.leg_objects[leg].servos[0].setPosition(500)
@@ -188,7 +188,7 @@ if __name__ == "__main__":
     # status_thread = threading.Thread(target=printHexapodErrors, args=())
     # status_thread.start()
 
-    main_hexapod.reorientYaw(500)
+    main_hexapod.reorientYaw()
 
     for i in range(1, 10):
         main_hexapod.changeBodyHeight(i * 10)
