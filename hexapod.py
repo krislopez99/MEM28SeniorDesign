@@ -58,8 +58,8 @@ class LEG:
         self.updateCurrAngles()
 
     def retractLeg(self, z):
-        self.servos[1].setPosition(self.curr_angs[1] - z)
-        self.servos[2].setPosition(self.curr_angs[2] + (z * 2))
+        self.servos[1].setPosition(self.curr_angs[1] + z)
+        self.servos[2].setPosition(self.curr_angs[2] + abs(z * 2))
         self.updateCurrAngles()
 
     def getLegStatus(self):
@@ -151,13 +151,44 @@ class HEXAPOD_BODY:
         arc_half = int(arc/2)
 
         self.leg_objects["front_right"].raiseLowerLegParallel(z)
-        self.leg_objects["front_right"].moveLegArc(int(arc_half/2))
+        self.leg_objects["front_right"].moveLegArc(arc_half)
+        self.leg_objects["mid_left"].raiseLowerLegParallel(z)
+        self.leg_objects["mid_left"].moveLegArc(arc_half * -1)
+
+        self.leg_objects["front_left"].moveLegArc(arc_half)
+        self.leg_objects["mid_right"].moveLegArc(arc_half * -1)
+
+        sleep(1) # End of initial lift
+
         self.leg_objects["front_right"].stretchLeg(z)
-        sleep(1)
+        self.leg_objects["front_right"].moveLegArc(int(arc_half))
+        self.leg_objects["mid_left"].raiseLowerLegParallel(z * -1)
+        self.leg_objects["mid_left"].moveLegArc(arc_half * -1)
+
+        self.leg_objects["front_left"].moveLegArc(arc_half)
+        self.leg_objects["mid_right"].moveLegArc(arc_half * -1)
+
+        sleep(1) # End of Initial Place
 
         self.leg_objects["front_right"].retractLeg(z)
-        self.leg_objects["front_right"].moveLegArc(int(arc_half/2))
-        sleep(1)
+        self.leg_objects["front_right"].moveLegArc(arc_half * -1)
+        self.leg_objects["mid_left"].moveLegArc(arc_half)
+
+        self.leg_objects["front_left"].raiseLowerLegParallel(z)
+        self.leg_objects["front_left"].moveLegArc(int(arc_half * -1))
+        self.leg_objects["mid_right"].raiseLowerLegParallel(z)
+        self.leg_objects["mid_right"].moveLegArc(int(arc_half))
+
+        sleep(1) # End of Second Lift
+
+        self.leg_objects["front_right"].moveLegArc(arc_half * -1)
+        self.leg_objects["mid_left"].moveLegArc(arc_half)
+
+        self.leg_objects["front_left"].raiseLowerLegParallel(z * -1)
+        self.leg_objects["front_left"].moveLegArc(int(arc_half * -1))
+        self.leg_objects["mid_right"].raiseLowerLegParallel(z * -1)
+        self.leg_objects["mid_right"].moveLegArc(arc_half)
+        sleep(1) # End of Second Place
 
         # # First group initial lift motion
 #        self.liftLegs(arc_half, z, first_group)
