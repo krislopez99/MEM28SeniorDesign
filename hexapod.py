@@ -156,6 +156,8 @@ class HEXAPOD_BODY:
         sleep(1)
 
         self.leg_objects["front_right"].retractLeg(z)
+        self.leg_objects["front_right"].moveLegArc(int(arc_half/2))
+        sleep(1)
 
         # # First group initial lift motion
 #        self.liftLegs(arc_half, z, first_group)
