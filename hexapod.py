@@ -124,6 +124,7 @@ class HEXAPOD_BODY:
         #middle leg: lift and rotate it forward
         self.leg_objects[group[2]].raiseLowerLegParallel(z)
         self.leg_objects[group[2]].moveLegArc(arc * -1)
+        sleep(1)
 
     def pushLegs(self, arc, z, group):
         #front leg: retract and rotate slightly outwards
@@ -134,6 +135,8 @@ class HEXAPOD_BODY:
         
         #middle leg: rotate it backward
         self.leg_objects[group[2]].moveLegArc(arc * -1)
+        sleep(1)
+        
 
 
         
@@ -143,17 +146,17 @@ class HEXAPOD_BODY:
 
         # First group initial lift motion
         self.liftLegs(arc // 2, z, first_group)
-        self.pushLegs(arc // -2, z, second_group)
+        self.pushLegs(arc // 2, z, second_group)
         # Second group place motion
         self.liftLegs(arc // 2, z * -1, first_group)
-        self.pushLegs(arc // -2, z, second_group)
+        self.pushLegs(arc // 2, z, second_group)
 
         # Second group initial lift motion
         self.liftLegs(arc // -2, z, second_group)
-        self.pushLegs(arc // 2, z, first_group)
+        self.pushLegs(arc // -2, z, first_group)
         # Second group place motion
         self.liftLegs(arc // -2, z * -1, second_group)
-        self.pushLegs(arc // 2, z, first_group)
+        self.pushLegs(arc // -2, z, first_group)
 
     def groupOneMoveForward(self, arc, z):
         arc_half = int(arc/2)
@@ -251,5 +254,5 @@ if __name__ == "__main__":
     for i in range(5):
         # main_hexapod.groupOneMoveForward(150, 200)
         # main_hexapod.groupTwoMoveForward(150, 200)
-        main_hexapod.moveForward(150, 200)
+        main_hexapod.moveForward(75, 200)
 
