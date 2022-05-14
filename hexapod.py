@@ -159,6 +159,7 @@ class HEXAPOD_BODY:
         # return to original stationary positions
         for leg in self.leg_objects:
             self.leg_objects[leg].setLegInit()
+        sleep(0.5)
         
         # # final lower
         # for l in second_group: #initial lift
