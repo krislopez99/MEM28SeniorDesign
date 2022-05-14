@@ -173,6 +173,7 @@ if __name__ == "__main__":
     main_hexapod = HEXAPOD_BODY(params, lx_bus)
 
     main_hexapod.resetHexapod()
+    sleep(2)
 
 #    for i in range(1, 10):
 #        main_hexapod.changeBodyHeight(i * 10)
@@ -184,5 +185,5 @@ if __name__ == "__main__":
     # for i in range(5):
     #     main_hexapod.rotateInPlace(20, 20)
 
-    for i in range(5):
-        main_hexapod.moveDirection(75, 200)
+#    for i in range(5):
+#        main_hexapod.moveDirection(75, 200)
