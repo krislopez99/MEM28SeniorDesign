@@ -12,12 +12,16 @@ class SERVO:
         self.min = min
         self.max = max
         self.init = init
+        self.curr_default = init
         self.curr_angle = init
         self.bus_link = bus_link
 
     def initServoState(self):
         self.bus_link.setAngleLimit(self.id, self.min, self.max)
         self.setPosition(self.init)
+
+    def setDefaultState(self):
+        self.setPosition(self.curr_default)
 
     def getPosition(self):
         return self.bus_link.readPosition(self.id)
@@ -40,6 +44,19 @@ class LEG:
         self.clean_ids = [s.id for s in self.servos]
         self.curr_angs = [s.curr_angle for s in self.servos]
 
+    def setLegInit(self):
+        for s in self.servos:
+            s.initServoState()
+            self.updateCurrAngles()
+
+    def setLegDefault(self):
+        self.servos[1].setDefaultState()
+        self.servos[2].setDefaultState()
+
+    def setNewLegDefault(self):
+        self.servos[1].curr_default = self.curr_angs[1]
+        self.servos[2].curr_default = self.curr_angs[2]
+
     def updateCurrAngles(self):
         self.curr_angs = [s.curr_angle for s in self.servos]
 
@@ -52,15 +69,8 @@ class LEG:
         self.servos[0].setPosition(self.curr_angs[0] + arc)
         self.updateCurrAngles()
 
-    def stretchLeg(self, z):
-        self.servos[1].setPosition(self.curr_angs[1] + z)
-        self.servos[2].setPosition(self.curr_angs[2] - abs(z * 2))
-        self.updateCurrAngles()
-
-    def retractLeg(self, z):
-        self.servos[1].setPosition(self.curr_angs[1] + z)
-        self.servos[2].setPosition(self.curr_angs[2] + abs(z * 2))
-        self.updateCurrAngles()
+    def setLeg(self, arc, p1, p2):
+        pass
 
     def getLegStatus(self):
         errors = {s.id: s.getServoStatus() for s in self.servos}
@@ -84,14 +94,14 @@ class HEXAPOD_BODY:
             for id in error.keys():
                 print(id, error[id], "\n")
 
+    def resetHexapod(self):
+        for leg in self.leg_objects:
+            self.leg_objects[leg].setLegInit()
+
     def changeBodyHeight(self, z):
         for leg in self.leg_objects:
             self.leg_objects[leg].raiseLowerLegParallel(z)
-
-    def reorientYaw(self):
-        for leg in self.leg_objects:
-            self.leg_objects[leg].servos[0].setPosition(500)
-            self.leg_objects[leg].updateCurrAngles()
+            self.leg_objects[leg].setNewLegDefault()
 
     def rotateInPlace(self, arc, z):
         first_group = ["front_right", "rear_right", "mid_left"]
@@ -118,31 +128,12 @@ class HEXAPOD_BODY:
             self.leg_objects[leg].raiseLowerLegParallel(z * -1)
         sleep(0.5)
 
-    def liftLegs(self, arc, z, group): #Expected group notation: [front, rear, mid]
-        #front leg: stretch forward, move arc slightly inwards
-        self.leg_objects[group[0]].stretchLeg(z)
-        self.leg_objects[group[0]].moveLegArc(arc//2)
-
-        #rear leg: lift and retract, move arc slightly outwards
-        # self.leg_objects[group[1]].raiseLowerLegParallel(z)
-        # self.leg_objects[group[1]].moveLegArc(arc//2)
-
-        #middle leg: lift and rotate it forward
-        # self.leg_objects[group[2]].raiseLowerLegParallel(z)
-        # self.leg_objects[group[2]].moveLegArc(arc * -1)
-        sleep(1)
-
-    def pushLegs(self, arc, z, group):
-        #front leg: retract and rotate slightly outwards
-        self.leg_objects[group[0]].moveLegArc(arc//2)
-        self.leg_objects[group[0]].retractLeg(z)
-
-        #rear leg: stretch outwards, move arc slightly inwards?
-        # self.leg_objects[group[1]].stretchLeg(z)
-
-        #middle leg: rotate it backward
-        # self.leg_objects[group[2]].moveLegArc(arc * -1)
-        sleep(1)
+    def moveDirection(self, leg_positions = {1: "front_left", 2: "front_right", 3: "mid_right", 4: "rear_right", 5: "rear_left", 6: "mid_left"}):
+        first_group = [1, 3, 5]
+        second_group = [2, 4, 6]
+        
+        for l in first_group:
+            self.leg_objects[leg_positions[l]]
 
     def moveForward(self, arc, z):
         first_group = ["front_right", "rear_right", "mid_left"]
@@ -207,22 +198,13 @@ class HEXAPOD_BODY:
     def moveInDirection(self, leg_directions, arc, z):
         pass
 
-def printHexapodErrors():
-    while True:
-        main_hexapod.printServoStatus()
-        sleep(1)
-
-
 if __name__ == "__main__":
     lx_bus= LX16A_BUS_MODIFIED(debug = False)
     with open('servo_params') as f:
         params = json.load(f)
     main_hexapod = HEXAPOD_BODY(params, lx_bus)
 
-    # status_thread = threading.Thread(target=printHexapodErrors, args=())
-    # status_thread.start()
-
-    main_hexapod.reorientYaw()
+    main_hexapod.resetHexapod()
 
     for i in range(1, 10):
         main_hexapod.changeBodyHeight(i * 10)
