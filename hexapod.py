@@ -52,6 +52,7 @@ class LEG:
     def setLegDefault(self):
         for s in self.servos:
             s.setDefaultState()
+            self.updateCurrAngles()
 
     def setNewLegDefault(self):
         self.servos[1].curr_default = self.curr_angs[1]
@@ -69,10 +70,10 @@ class LEG:
         self.servos[0].setPosition(self.curr_angs[0] + arc)
         self.updateCurrAngles()
 
-    def setLeg(self, arc, p1, p2):
+    def setLeg(self, arc, p1, p2): # positive value syntax: CCW, lift, lift
         self.servos[0].setPosition(self.curr_angs[0] + arc)
-        self.servos[1].setPosition(self.curr_angs[1] + p1)
-        self.servos[2].setPosition(self.curr_angs[2] + p2)
+        self.servos[1].setPosition(self.curr_angs[1] - p1)
+        self.servos[2].setPosition(self.curr_angs[2] - p2)
         self.updateCurrAngles()
 
     def getLegStatus(self):
@@ -130,41 +131,108 @@ class HEXAPOD_BODY:
         for leg in second_group:
             self.leg_objects[leg].raiseLowerLegParallel(z * -1)
         sleep(0.5)
+        
+    def testSingleLeg(self, arc, z, leg_positions = {1: "front_left", 2: "front_right", 3: "mid_right", 4: "rear_right", 5: "rear_left", 6: "mid_left"}):
+        first_group = [1, 3, 5]
+        second_group = [2, 6, 4]
+
+        self.leg_objects[leg_positions[2]].setLeg(0, z, z)
+        sleep(2)
+        self.leg_objects[leg_positions[2]].setLeg(int(z/3), z * -1, 0)
+        sleep(2)
+        self.leg_objects[leg_positions[2]].setLegDefault()
+        sleep(2)
 
     def moveDirection(self, arc, z, leg_positions = {1: "front_left", 2: "front_right", 3: "mid_right", 4: "rear_right", 5: "rear_left", 6: "mid_left"}):
         first_group = [1, 3, 5]
         second_group = [2, 6, 4]
 
-        for l in first_group: #initial lift
-            self.leg_objects[leg_positions[l]].raiseLowerLegParallel(z)
-        sleep(1)
+        # positive value syntax for setLeg(arc,p1,p2): CCW, lift, lift
+        # stretching/pushing/propelling (WITH setLeg): -p1, +p2
+        
+
+        for leg in first_group: #initial lift
+            self.leg_objects[leg_positions[leg]].raiseLowerLegParallel(z)
+#            if leg == first_group[0]:
+#                self.leg_objects[leg_positions[leg]].setLeg(0,0,z)
+        sleep(2)
 
         # front_right and mid_left arc backwards
-        self.leg_objects[leg_positions[second_group[0]]].setLeg(int(arc/ -2), z*-1, z)
-        self.leg_objects[leg_positions[second_group[1]]].moveLegArc(arc)
+        self.leg_objects[leg_positions[second_group[0]]].setLeg(int(z / -3), z, int(z * -0.75))
+        self.leg_objects[leg_positions[second_group[1]]].setLeg(arc, int(z / -2), int(z / 2))
         # rear_right pushes to propel forwards
-        self.leg_objects[leg_positions[second_group[2]]].setLeg(arc * -1, z, z * -2)
-        sleep(1)
+        self.leg_objects[leg_positions[second_group[2]]].setLeg(int(z / -3), z * -1, z)
+        sleep(2)
 
         # first group places
-        for l in first_group:
-            self.leg_objects[leg_positions[l]].raiseLowerLegParallel(z  * -1)
-        sleep(1)
+#        self.leg_objects[leg_positions[first_group[0]]].setLeg(0, int(z * -1.5), z)
+#        self.leg_objects[leg_positions[first_group[1]]].setLeg(0, int(z * -1.5), z)
+#        self.leg_objects[leg_positions[first_group[2]]].setLeg(int(z / 3), int(z * -1), z)
 
-        #second lift
+        for leg in first_group: #initial lift
+            self.leg_objects[leg_positions[leg]].raiseLowerLegParallel(z * -1)
+        sleep(2)
+
+        # second lift
         for l in second_group: #initial lift
-            self.leg_objects[leg_positions[l]].raiseLowerLegParallel(z)
-        sleep(1)
+            self.leg_objects[leg_positions[l]].raiseLowerLegParallel(int(z * 1.5))
+        sleep(2)
 
         # return to original stationary positions
+        for leg in first_group:
+            self.leg_objects[leg_positions[leg]].setLegDefault()
+        sleep(2)
+        
+        for leg in second_group:
+            self.leg_objects[leg_positions[leg]].setLegDefault()
+        sleep(2)
+
+#        # final lower
+#        for l in second_group:
+#            self.leg_objects[leg_positions[l]].raiseLowerLegParallel(z)
+#        sleep(2)
+
+    def moveDirectionAlt(self, arc, z, leg_positions =  {1: "front_right", 2: "mid_right", 3: "rear_right", 4: "rear_left", 5: "mid_left", 6: "front_left"}):
+        first_group = [2, 4, 6]
+        second_group = [1, 3, 5]
+        
+        # initial lift
+        for leg in first_group:
+            self.leg_objects[leg_positions[leg]].raiseLowerLegParallel(z)
+            if leg == first_group[0]:
+                self.leg_objects[leg_positions[leg]].setLeg(0,0,int(z/2))
+        sleep(0.5)
+        
+        # propel forward
+        self.leg_objects[leg_positions[second_group[0]]].setLeg(arc, int(z/1.5), int(z/-1.25))
+        self.leg_objects[leg_positions[second_group[1]]].setLeg(arc * -1, int(z/1.5), int(z/-1.25))
+        self.leg_objects[leg_positions[second_group[2]]].setLeg(0, z * -1, z)
+        sleep(0.5)
+        
+        # initial place
+        for leg in first_group:
+            self.leg_objects[leg_positions[leg]].raiseLowerLegParallel(z * -1)
+            if leg == first_group[0]:
+                self.leg_objects[leg_positions[leg]].setLeg(0,0,z * -1)
+        sleep(0.5)
+        
+        # second lift
+        self.leg_objects[leg_positions[second_group[0]]].raiseLowerLegParallel(z)
+        self.leg_objects[leg_positions[second_group[1]]].raiseLowerLegParallel(z)
+        self.leg_objects[leg_positions[second_group[2]]].setLeg(0, z * 2, z * -1)
+        sleep(0.5)
+        
+        # reorient second legs
+        self.leg_objects[leg_positions[second_group[0]]].moveLegArc(arc * -1)
+        self.leg_objects[leg_positions[second_group[1]]].moveLegArc(arc)
+        self.leg_objects[leg_positions[second_group[2]]].setLeg(0, z, z * -1)
+        sleep(0.5)
+        
+        # second place
         for leg in self.leg_objects:
             self.leg_objects[leg].setLegDefault()
-        sleep(1)
-
-        #final lower
-        for l in second_group:
-            self.leg_objects[leg_positions[l]].raiseLowerLegParallel(z * -1)
-        sleep(1)
+        sleep(0.5)
+        
 
 if __name__ == "__main__":
     lx_bus= LX16A_BUS_MODIFIED(debug = False)
@@ -185,5 +253,5 @@ if __name__ == "__main__":
     # for i in range(5):
     #     main_hexapod.rotateInPlace(20, 20)
 
-#    for i in range(5):
-#        main_hexapod.moveDirection(75, 200)
+    for i in range(10):
+        main_hexapod.moveDirectionAlt(125, 200)
